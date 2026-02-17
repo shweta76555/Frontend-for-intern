@@ -6,12 +6,38 @@ function Login() {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Login:', { email, password });
-    // Navigate to home after login
-    navigate('/');
+    setError('');
+    setLoading(true);
+
+    try {
+      const res = await fetch('http://localhost:5052/api/v1/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        // Expecting a JWT token in `data.token` or `data.accessToken`
+        const token = data.token ?? data.accessToken ?? data;
+        console.log('Login success, token:', token);
+        try { localStorage.setItem('jwtToken', typeof token === 'string' ? token : JSON.stringify(token)); } catch (err) { console.error('LocalStorage error', err); }
+        navigate('/dashboard');
+      } else {
+        setError(data.message || 'Login failed');
+      }
+    } catch (err) {
+      console.error('Login error', err);
+      setError(err.message || 'Network error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const loginContainerStyle = {
