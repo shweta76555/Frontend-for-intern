@@ -1,9 +1,30 @@
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 
 function App() {
+  const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState(Boolean(localStorage.getItem('jwtToken')));
+
+  useEffect(() => {
+    const onAuth = () => setIsAuthenticated(Boolean(localStorage.getItem('jwtToken')));
+    window.addEventListener('authChanged', onAuth);
+    window.addEventListener('storage', onAuth);
+    return () => {
+      window.removeEventListener('authChanged', onAuth);
+      window.removeEventListener('storage', onAuth);
+    };
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('jwtToken');
+    // also remove fallback token key if present
+    localStorage.removeItem('token');
+    setIsAuthenticated(false);
+    navigate('/');
+  };
   const navbarStyle = {
     background: 'linear-gradient(135deg, #183de6ff 0%, #712db6ff 100%)',
     padding: '1rem 2rem',
@@ -41,8 +62,17 @@ function App() {
       <nav style={navbarStyle}>
         <Link to="/test" style={navLinkStyle}>Test Conn </Link>
         <Link to="/" style={navLinkStyle}>Home</Link>
-        <Link to="/login" style={navLinkStyle}>Login</Link>
-        <Link to="/register" style={navLinkStyle}>Register</Link>
+        {!isAuthenticated ? (
+          <>
+            <Link to="/login" style={navLinkStyle}>Login</Link>
+            <Link to="/register" style={navLinkStyle}>Register</Link>
+          </>
+        ) : (
+          <>
+            <Link to="/dashboard" style={navLinkStyle}>Dashboard</Link>
+            <button onClick={handleLogout} style={{ ...navLinkStyle, background: 'transparent', border: 'none', padding: 0 }}>Logout</button>
+          </>
+        )}
       </nav>
       <Routes>
         <Route path="/" element={

@@ -28,6 +28,8 @@ function Login() {
         const token = data.token ?? data.accessToken ?? data;
         console.log('Login success, token:', token);
         try { localStorage.setItem('jwtToken', typeof token === 'string' ? token : JSON.stringify(token)); } catch (err) { console.error('LocalStorage error', err); }
+        // notify other parts of the app of auth change
+        try { window.dispatchEvent(new Event('authChanged')); } catch (e) { /* ignore */ }
         navigate('/dashboard');
       } else {
         setError(data.message || 'Login failed');
