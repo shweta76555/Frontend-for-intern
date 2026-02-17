@@ -1,3 +1,6 @@
+import { Routes, Route, Link } from 'react-router-dom';
+import Login from './pages/Login';
+
 function App() {
   const navbarStyle = {
     background: 'linear-gradient(135deg, #183de6ff 0%, #712db6ff 100%)',
@@ -34,13 +37,18 @@ function App() {
   return (
     <>
       <nav style={navbarStyle}>
-        <a style={navLinkStyle}>Home</a>
-        <a style={navLinkStyle}>Login</a>
-        <a style={navLinkStyle}>Register</a>
+        <Link to="/" style={navLinkStyle}>Home</Link>
+        <Link to="/login" style={navLinkStyle}>Login</Link>
+        <Link to="/register" style={navLinkStyle}>Register</Link>
       </nav>
-      <div style={centerStyle}>
-        <h1 style={headingStyle}>Frontend For Intern task</h1>
-      </div>
+      <Routes>
+        <Route path="/" element={
+          <div style={centerStyle}>
+            <h1 style={headingStyle}>Frontend For Intern task</h1>
+          </div>
+        } />
+        <Route path="/login" element={<Login />} />
+      </Routes>
     </>
   );
 }
