@@ -7,6 +7,9 @@ function Register() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -29,11 +32,35 @@ function Register() {
       return;
     }
 
-    // Handle registration logic here
-    console.log('Register:', { name, email, password });
-    // TODO: Send data to backend API
-    // After successful registration, navigate to login
-    navigate('/login');
+    setLoading(true);
+
+    try {
+      const response = await fetch('http://localhost:5052/api/v1/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password: password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('Registration successful:', data);
+        navigate('/login');
+      } else {
+        setError(data.message || 'Registration failed. Please try again.');
+      }
+    } catch (err) {
+      setError(err.message || 'An error occurred. Please try again.');
+      console.error('Registration error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const registerContainerStyle = {
@@ -70,6 +97,33 @@ function Register() {
     borderRadius: '4px',
     fontSize: '1rem',
     boxSizing: 'border-box',
+  };
+
+  const passwordInputWrapperStyle = {
+    position: 'relative',
+    marginBottom: '1rem',
+  };
+
+  const passwordInputFieldStyle = {
+    width: '100%',
+    padding: '0.75rem 2.5rem 0.75rem 0.75rem',
+    border: '1px solid #ddd',
+    borderRadius: '4px',
+    fontSize: '1rem',
+    boxSizing: 'border-box',
+  };
+
+  const eyeButtonStyle = {
+    position: 'absolute',
+    right: '0.75rem',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '1.2rem',
+    color: '#666',
+    padding: '0.25rem',
   };
 
   const errorStyle = {
@@ -121,24 +175,42 @@ function Register() {
           style={inputStyle}
           required
         />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={inputStyle}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          style={inputStyle}
-          required
-        />
-        <button type="submit" style={buttonStyle}>
-          Register
+        <div style={passwordInputWrapperStyle}>
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={passwordInputFieldStyle}
+            required
+          />
+          <button
+            type="button"
+            style={eyeButtonStyle}
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? '👁️' : '👁️‍🗨️'}
+          </button>
+        </div>
+        <div style={passwordInputWrapperStyle}>
+          <input
+            type={showConfirmPassword ? "text" : "password"}
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            style={passwordInputFieldStyle}
+            required
+          />
+          <button
+            type="button"
+            style={eyeButtonStyle}
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+          >
+            {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+          </button>
+        </div>
+        <button type="submit" style={buttonStyle} disabled={loading}>
+          {loading ? 'Registering...' : 'Register'}
         </button>
         <div style={loginLinkStyle} onClick={() => navigate('/login')}>
           Already have an account? Login
