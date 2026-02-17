@@ -1,5 +1,6 @@
 import { Routes, Route, Link } from 'react-router-dom';
 import Login from './pages/Login';
+import Register from './pages/Register';
 
 function App() {
   const navbarStyle = {
@@ -37,6 +38,7 @@ function App() {
   return (
     <>
       <nav style={navbarStyle}>
+        <Link to="/test" style={navLinkStyle}>Test Conn </Link>
         <Link to="/" style={navLinkStyle}>Home</Link>
         <Link to="/login" style={navLinkStyle}>Login</Link>
         <Link to="/register" style={navLinkStyle}>Register</Link>
@@ -48,6 +50,7 @@ function App() {
           </div>
         } />
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
       </Routes>
     </>
   );
