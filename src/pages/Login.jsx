@@ -24,14 +24,27 @@ function Login() {
       const data = await res.json();
 
       if (res.ok) {
-        // Expecting a JWT token in `data.token` or `data.accessToken`
-        const token = data.token ?? data.accessToken ?? data;
-        console.log('Login success, token:', token);
-        try { localStorage.setItem('jwtToken', typeof token === 'string' ? token : JSON.stringify(token)); } catch (err) { console.error('LocalStorage error', err); }
-        // notify other parts of the app of auth change
-        try { window.dispatchEvent(new Event('authChanged')); } catch (e) { /* ignore */ }
-        navigate('/dashboard');
-      } else {
+  const token = data.token ?? data.accessToken ?? data;
+
+  localStorage.setItem(
+    'jwtToken',
+    typeof token === 'string' ? token : JSON.stringify(token)
+  );
+
+  // Decode JWT to get role
+  const jwt = typeof token === "string" ? token : JSON.stringify(token);
+  const payload = JSON.parse(atob(jwt.split('.')[1]));
+
+  const role =
+    payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+
+  if (role === "Admin") {
+    navigate("/admin-dashboard");
+  } else {
+    navigate("/dashboard");
+  }
+}
+ else {
         setError(data.message || 'Login failed');
       }
     } catch (err) {
