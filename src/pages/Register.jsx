@@ -6,7 +6,9 @@ function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [userType, setUserType] = useState('user');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -44,6 +46,7 @@ function Register() {
           name,
           email,
           password: password,
+          userType,
         }),
       });
 
@@ -51,7 +54,9 @@ function Register() {
 
       if (response.ok) {
         console.log('Registration successful:', data);
-        navigate('/login');
+        setSuccess('Registration successful! Redirecting to login...');
+        // delay navigation to give user time to read message
+        setTimeout(() => navigate('/login'), 5000);
       } else {
         setError(data.message || 'Registration failed. Please try again.');
       }
@@ -159,6 +164,7 @@ function Register() {
       <form style={formStyle} onSubmit={handleSubmit}>
         <h1 style={headingStyle}>Register</h1>
         {error && <div style={errorStyle}>{error}</div>}
+        {success && <div style={{ ...errorStyle, color: 'green' }}>{success}</div>}
         <input
           type="text"
           placeholder="Full Name"
@@ -175,6 +181,21 @@ function Register() {
           style={inputStyle}
           required
         />
+        {/* user type selection; only user is actionable, admin must be added manually in the database */}
+        <select
+          value={userType}
+          onChange={(e) => setUserType(e.target.value)}
+          style={inputStyle}
+        >
+          <option value="user">User</option>
+          <option value="admin" disabled>
+            Admin (add manually in DB)
+          </option>
+        </select>
+        <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem' }}>
+          Only users can self‑register here; if you need an admin account,
+          add it manually in the database.
+        </div>
         <div style={passwordInputWrapperStyle}>
           <input
             type={showPassword ? "text" : "password"}
